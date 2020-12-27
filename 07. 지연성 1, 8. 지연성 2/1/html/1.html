@@ -3,36 +3,35 @@
 ## range
 
 <script>
-  var add = (a, b) => a + b;
+  const add = (a, b) => a + b;
 
   const range = l => {
     let i = -1;
     let res = [];
     while (++i < l) {
-      res.push(i);
+      res.push(i)
     }
     return res;
   };
 
-  var list = range(4);
-  log(list);
-  log(reduce(add, list));
+  var list = range(5);
+  log(list)
+
 </script>
 
 ## 느긋한 L.range
 
 <script>
   const L = {};
-  L.range = function* (l) {
+  L.range = function *(l) {
     let i = -1;
     while (++i < l) {
       yield i;
     }
-  };
+  }
 
-  var list = L.range(4);
-  log(list);
-  log(reduce(add, list));
+  var list = L.range(5);
+  log(list)
 </script>
 
 <script>
@@ -44,9 +43,7 @@
 
   // test('range', 10, () => reduce(add, range(1000000)));
   // test('L.range', 10, () => reduce(add, L.range(1000000)));
-  console.clear();
 </script>
-
 ## take
 
 <script>
@@ -57,21 +54,26 @@
       if (res.length == l) return res;
     }
     return res;
+
   });
+  // range
   console.time('');
   go(
     range(10000),
     take(5),
     reduce(add),
-    log);
-  console.timeEnd('');
+    log
+  )
+  console.timeEnd('')
 
-  console.time('');
+  // L.range
+  console.time('')
   go(
     L.range(10000),
     take(5),
     reduce(add),
-    log);
-  console.timeEnd('');
+    log
+  )
+  console.timeEnd('')
 </script>
 

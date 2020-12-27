@@ -20,41 +20,54 @@
   ];
 
   const add = (a, b) => a + b;
-
+  
   const sum = curry((f, iter) => go(
     iter,
     map(f),
-    reduce(add)));
+    reduce(add)
+    ));
 
+  // 총 수량
   const total_quantity = sum(p => p.quantity);
 
-  const total_price = sum(p => p.price * p.quantity);
+  // 총 가격
+  const total_price = sum(p => p.quantity * p.price);
 
-  document.querySelector('#cart').innerHTML = `
-    <table>
+// 추상화 레벨이 높아지면 높아질수록 아래 처럼 사용성이 높아진다.(여러곳에서 사용가능)
+//   log(sum(u => u.age, [
+//   {'age' : 15},
+//   {'age' : 25},
+//   {'age' : 35},
+// ]));
+
+  document.querySelector('#cart').innerHTML =`
+  <table>
+    <tr>
+      <th></th>
+      <th>상품 이름</th>  
+      <th>가격</th>  
+      <th>수량</th>  
+      <th>총 가격</th>  
+    </tr>
+    ${go(products,
+      sum(p => `
       <tr>
-        <th></th>
-        <th>상품 이름</th>
-        <th>가격</th>
-        <th>수량</th>
-        <th>총 가격</th>
+        <td><input type="checkbox" ${p.is_selected ? 'checked' : ''}></td>
+        <td>${p.name}</td>  
+        <td>${p.price}</td>  
+        <td><input type="number" value="${p.quantity}"></td>  
+        <td>${p.price * p.quantity}</td>  
       </tr>
-      ${go(products, sum(p => `
-          <tr>
-            <td><input type="checkbox" ${p.is_selected ? 'checked' : ''}></td>
-            <td>${p.name}</td>
-            <td>${p.price}</td>
-            <td><input type="number" value="${p.quantity}"></td>
-            <td>${p.price * p.quantity}</td>
-          </tr>
-      `))}
-      <tr>
-        <td colspan="3">합계</td>
-        <td>${total_quantity(filter(p => p.is_selected, products))}</td>
-        <td>${total_price(filter(p => p.is_selected, products))}</td>
-      </tr>
-    </table>
-  `;
+    `))}
+
+    <tr>
+      <td colspan="3">합계</td>  
+      <td>${total_quantity(filter(p => p.is_selected, products))}</td>  
+      <td>${total_price(filter(p => p.is_selected, products))}</td>  
+    </tr>
+  </table>
+  
+  `
 </script>
 
 </body>
