@@ -113,14 +113,15 @@
     [6, 7, 8],
     [9, 10]
   ];
-
+  
   go(arr,
     L.flatten,
     L.filter(a => a % 2),
     L.map(a => a * a),
-    take(4),
+    take(3),
     reduce(add),
-    log);
+    log
+  )
 </script>
 
 
@@ -153,12 +154,14 @@
     }
   ];
 
-  go(users,
-    L.flatMap(u => u.family),
-    L.filter(u => u.age > 20),
-    L.map(u => u.age),
+  go(
+    users,
+    L.map(u => u.family),
+    L.flatten,
+    L.filter(u => u.age < 20),
+    L.map(u => u.name),
     take(4),
-    reduce(add),
-    log);
+    log
+  )
 </script>
 

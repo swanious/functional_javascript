@@ -11,10 +11,10 @@
   // L.map = function *(f, iter) {
   //   for (const a of iter) yield f(a);
   // };
-  // var it = L.map(a => a + 10, [1, 2, 3]);
-  // log(it.next());
-  // log(it.next());
-  // log(it.next());
+  // var it = L.map(a => a + 10, [1,2,3]);
+  // log(it.next())
+  // log(it.next())
+  // log(it.next())
 </script>
 
 ### L.filter
@@ -23,10 +23,8 @@
   // L.filter = function *(f, iter) {
   //   for (const a of iter) if (f(a)) yield a;
   // };
-  // var it = L.filter(a => a % 2, [1, 2, 3, 4]);
-  // log(it.next());
-  // log(it.next());
-  // log(it.next());
+  // var it2 = L.filter(a => a % 2, [1,2,3])
+  // log(it2.next())
 </script>
 
 
@@ -91,13 +89,14 @@
     return acc;
   });
 
-  // console.time('');
-  // go(range(100000),
-  //   map(n => n + 10),
-  //   filter(n => n % 2),
-  //   take(10),
-  //   log);
-  // console.timeEnd('');
+  console.time('F'),
+  go(
+    range(10000),
+    map(n=> n+10),
+    filter(n => n % 2),
+    take(2),
+  )
+  console.timeEnd('F')
 </script>
 
 ### L.range, L.map, L.filter, take, reduce 중첩 사용
@@ -130,6 +129,7 @@
     }
   });
 
+
   // [0, 1, 2, 3, 4, 5, 6, 7, 8...]
   // [10, 11, 12, ...]
   // [11, 13, 15 ..]
@@ -140,13 +140,13 @@
   // false]  true]
   //
 
-  // console.time('L');
-  // go(L.range(Infinity),
-  //   L.map(n => n + 10),
-  //   L.filter(n => n % 2),
-  //   take(10),
-  //   log);
-  // console.timeEnd('L');
+  console.time('L');
+  go(L.range(Infinity),
+    L.map(n => n + 10),
+    L.filter(n => n % 2),
+    take(10),
+    log);
+  console.timeEnd('L');
 </script>
 
 ### map, filter 계열 함수들이 가지는 결합 법칙
@@ -165,54 +165,64 @@
 ### reduce
 
 <script>
-  L.entries = function* (obj) {
-    for (const k in obj) yield [k, obj[k]];
-  };
+  const join = (sep, iter) => 
+    reduce((a, b) => `${a}${sep}${b}`, iter);
 
-  const join = curry((sep = ',', iter) =>
-    reduce((a, b) => `${a}${sep}${b}`, iter));
+  L.entries = function *(obj) {
+    for (const k in obj) yield [k, obj[k]];
+  }
 
   const queryStr = pipe(
     L.entries,
+    function(a) {
+      console.log(a)
+      return a
+    },
     L.map(([k, v]) => `${k}=${v}`),
-    join('&'));
+    reduce((a, b) => `${a}&${b}`)
+  );
+  log(queryStr({ limit: 10, offset: 10, type: 'notice' }))
 
-  log(queryStr({limit: 10, offset: 10, type: 'notice'}));
+  function *a() {
+    yield 10;
+    yield 11;
+    yield 12;
+    yield 13;
+    yield 14;
+  }
+  // a().join(',')
 
-  // function *a() {
-  //   yield 10;
-  //   yield 11;
-  //   yield 12;
-  //   yield 13;
-  // }
-  //
-  // log(join(' - ', a()));
+  log(join('-', a()))
 </script>
 
 ### take, find
 
 <script>
   const users = [
-    {age: 32},
-    {age: 31},
-    {age: 37},
-    {age: 28},
-    {age: 25},
-    {age: 32},
-    {age: 31},
-    {age: 37}
-  ];
+    { age: 32 },
+    { age: 31 },
+    { age: 37 },
+    { age: 26 },
+    { age: 30 },
+    { age: 21 },
+    { age: 15 },
+    { age: 25 },
+    { age: 35 },
+  ]
 
   const find = curry((f, iter) => go(
     iter,
     L.filter(f),
     take(1),
-    ([a]) => a));
+    ([a]) => a
+  ));
 
   log(find(u => u.age < 30)(users));
 
-  go(users,
+  go(
+    users,
     L.map(u => u.age),
     find(n => n < 30),
-    log);
+    log
+  );
 </script>
