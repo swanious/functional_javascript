@@ -6,98 +6,95 @@
 
 <script>
   function add10(a, callback) {
-    setTimeout(() => callback(a + 10), 100);
+    setTimeout(() => callback(a + 10), 1000);
   }
 
-  var a = add10(5, res => {
-    add10(res, res => {
-      add10(res, res => {
-        // log(res);
-      });
-    });
-  });
-
-  // log(a);
+  // add10(5, res => {
+  //   add10(res, res => {
+  //     add10(res, res => {
+  //       add10(res, res => {
+  //         log(res);
+  //       })
+  //     })
+  //   })
+  // })
 
   function add20(a) {
     return new Promise(resolve => setTimeout(() => resolve(a + 20), 100));
   }
 
-  var b = add20(5)
-    .then(add20)
-    .then(add20)
-  // .then(log);
-
-  // log(b);
+  // add20(5)
+  //   .then(add20)
+  //   .then(add20)
+  //   .then(add20)
+  //   .then(add20)
+  //   .then(add20)
+  //   .then(log)
 </script>
 
 ## 일급 활용
 
 <script>
-  const delay100 = a => new Promise(resolve =>
+  const delay100 = a => new Promise(resolve => 
     setTimeout(() => resolve(a), 100));
 
   const go1 = (a, f) => a instanceof Promise ? a.then(f) : f(a);
   const add5 = a => a + 5;
 
-  const n1 = 10;
-  // log(go1(go1(n1, add5), log));
+  const n1 = 10
+  // go1(go1(n1, add5), log);
 
-  const n2 = delay100(10);
-  // log(go1(go1(n2, add5), log));
+  const n2 = delay100(10)
+  // go1(go1(n2, add5), log);
+
 </script>
 
 ## Composition
+- 함수 합성을 안전하게 하는 규칙(모나드에 대한 개념)
 
 <script type="module">
-  // f . g
-  // f(g(x))
-
   const g = a => a + 1;
   const f = a => a * a;
 
-  // log(f(g(1)));
+  // log(f(g(1)))
   // log(f(g()));
 
-  Array.of(1).map(g).map(f)/*.forEach(r => log(r))*/;
-  [].map(g).map(f)/*.forEach(r => log(r))*/;
+  Array.of(1).map(g).map(f).forEach(r => log(r));
+  [].map(g).map(f).forEach(r => log(r));
 
-  Promise.resolve(2).then(g).then(f)/*.then(r => log(r))*/;
-  new Promise(resolve =>
+  Promise.resolve(2).then(g).then(f).then(r => log(r));
+  new Promise(resolve => 
     setTimeout(() => resolve(2), 100)
-  ).then(g).then(f)/*.then(r => log(r))*/;
+    ).then(g).then(f).then(r => log(r));
+
 </script>
 
 ## Kleisli Composition
+- 오류가 있을 수 있는 상황에서의 함수 합성을 하는 규칙
+- 함수 합성을 할 때 원하는 방식으로 되지 않을 수도 있음.
+- 이러한 상황을 해결하기 위한 방식
 
 <script>
   // f . g
   // f(g(x)) = f(g(x))
-  // f(g(x)) = g(x)
+  // f(g(x)) = g(x) 이 상황에서 사용하기 위한 규칙
 
   var users = [
-    {id: 1, name: 'aa'},
-    {id: 2, name: 'bb'},
-    {id: 3, name: 'cc'}
-  ];
+    { id: 1, name: 'aa'},
+    { id: 2, name: 'bb'},
+    { id: 3, name: 'cc'},
+    ]
 
-  const getUserById = id =>
-    find(u => u.id == id, users) || Promise.reject('없어요!');
+    const getUserById = id =>
+      find(u => u.id == id, users) || Promise.reject('없어요!');
 
-  const f = ({name}) => name;
-  const g = getUserById;
+    const f = ({name}) => name;
+    const g = getUserById;
 
-  // const fg = id => f(g(id));
+    const fg = id => Promise.resolve(id).then(g).then(f).catch(a => a);
 
-  const fg = id => Promise.resolve(id).then(g).then(f).catch(a => a);
+    fg(2).then(log)
 
-  fg(2).then(log);
-
-  setTimeout(function () {
-    users.pop();
-    users.pop();
-    fg(2).then(log);
-  }, 10);
 </script>
 
 
