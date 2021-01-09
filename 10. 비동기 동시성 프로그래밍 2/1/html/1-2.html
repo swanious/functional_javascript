@@ -3,17 +3,23 @@
 ## 지연된 함수열을 병렬적으로 평가하기 - C.reduce, C.take
 
 <script>
+  // 여기서 C는 병렬/병행성을 의미하는 concurrency
   const C = {};
 
-  function noop() {
-  }
-
+  // 핸들링 되지 않은 Promise.reject()는 log에 에러 메시지를 뿜는다. 이를 위해 미리 catch문의 받아놓고,
+  // 이후 catch를 해야할 때 재사용하기 위해서, `미리 아무것도 실행시키지 않는 함수`를 catch로 실행하여 에러 핸들링을 한 후,
+  // carch가 필요한 부분에서 catch문을 사용할 수 있도록 한다. 
+  function noop() {}; 
   const catchNoop = ([...arr]) =>
     (arr.forEach(a => a instanceof Promise ? a.catch(noop) : a), arr);
 
+  // 병렬적으로 처리하는 이유는 데이터를 지연적으로 처리하면 시간이 오래걸릴 가능성이 있으므로,
+  // 병렬적으로 미리 값을 다 평가한 후, 병렬적으로 함수를 실행하는 것이 필요하다.
   C.reduce = curry((f, acc, iter) => iter ?
-    reduce(f, acc, catchNoop(iter)) :
-    reduce(f, catchNoop(acc)));
+    // catchNoop에서 arr를 다 뽑아줬기 때문에([...arr]) 그냥 iter와 acc를 받아주면 된다.
+    reduce(f, acc, catchNoop(iter)) : 
+    reduce(f, acc, catchNoop(acc))
+  )
 
   C.take = curry((l, iter) => take(l, catchNoop(iter)));
 
@@ -24,18 +30,18 @@
   C.filter = curry(pipe(L.filter, C.takeAll));
 
   const delay1000 = a => new Promise(resolve => {
-    console.log('hi~');
+    console.log('hi!');
     setTimeout(() => resolve(a), 1000);
   });
-  /*  // console.time('');
-    go([1, 2, 3, 4, 5, 6, 7, 8, 9],
-      L.map(a => delay1000(a * a)),
-      L.filter(a => delay1000(a % 2)),
-      L.map(a => delay1000(a * a)),
-      // C.take(2),
-      C.reduce(add),
-      /!*log,
-      _ => console.timeEnd('')*!/);*/
+
+  // console.timeStamp('')
+  // go([1,2,3,4,5],
+  //   L.map(a => delay500(a * a)),
+  //   L.filter(a => a % 2),
+  //   reduce(add),
+  //   log,
+  //   _.console.timeEnd('')
+  // );
 </script>
 
 ## 즉시 병렬적으로 평가하기 - C.map, C.filter
@@ -48,10 +54,9 @@
 ## 즉시, 지연, Promise, 병렬적 조합하기
 
 <script>
-  // const delay500 = a => a;
   const delay500 = (a, name) => new Promise(resolve => {
     console.log(`${name}: ${a}`);
-    setTimeout(() => resolve(a), 100);
+    setTimeout(() => resolve(a), 500);
   });
 
   console.time('');
@@ -60,7 +65,7 @@
     L.filter(a => delay500(a % 2, 'filter 2')),
     L.map(a => delay500(a + 1, 'map 3')),
     C.take(2),
-    reduce(add),
+    C.reduce(add),
     log,
     _ => console.timeEnd(''));
 </script>

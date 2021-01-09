@@ -38,7 +38,6 @@
   const delay100 = a => new Promise(resolve => 
     setTimeout(() => resolve(a), 100));
 
-  const go1 = (a, f) => a instanceof Promise ? a.then(f) : f(a);
   const add5 = a => a + 5;
 
   const n1 = 10
@@ -93,7 +92,7 @@
 
     const fg = id => Promise.resolve(id).then(g).then(f).catch(a => a);
 
-    fg(2).then(log)
+    fg(4).then(log)
 
 </script>
 
